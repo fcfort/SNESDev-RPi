@@ -137,9 +137,8 @@ void checkButton(int uinh) {
 	uint8_t buttonState = bcm2835_gpio_lev(buttonPin);
   
   	// three-state machine:
-  	// - press and hold: send "r" key (for rewind function of RetroArch)
-  	// - press and release three times: send "ESC"
-  	// - press and release five times: shutdown
+  	// - press and release one times: send "H"
+  	// - press and release two times: send "Escape"
 	switch ( btnState ) {
 		case BTNSTATE_IDLE:
 			if (buttonState==HIGH ) {
@@ -152,35 +151,25 @@ void checkButton(int uinh) {
 			if (buttonState==LOW ) {
 				btnLastTime=time(NULL);
 				btnState = BTNSTATE_RELEASE;
-			} else if (buttonState==HIGH && btnPressCtr==1 && difftime(time(NULL),btnLastTime)>1) {
-				send_key_event(uinh, KEY_R,1);
 			}
 			break;
 		case BTNSTATE_RELEASE:
 		 	if (buttonState==LOW && difftime(time(NULL),btnLastTime)>1 ) {
-
-			 	if (btnPressCtr==1) {
-					send_key_event(uinh, KEY_R,0);
-			 	} else if (btnPressCtr==3) {
-					// Sending ESC
+			 	if (btnPressCtr == 1) {
+					// Reset current game
+					send_key_event(uinh, KEY_H,1);
+					usleep(50000);
+					send_key_event(uinh, KEY_H,0);
+			 	} else if (btnPressCtr == 2) {
+					// Return to ES
 					send_key_event(uinh, KEY_ESC,1);
 					usleep(50000);
 					send_key_event(uinh, KEY_ESC,0);
-				} else if ( btnPressCtr==5 ) {
-					// shutting down
-					pollButton = 0;
-			 		pollPads = 0;
-					send_key_event(uinh, KEY_F4,1);
-					usleep(50000);
-					send_key_event(uinh, KEY_F4,0);
-
-					system("shutdown -t 3 -h now");
 				}
-
 				btnLastTime=time(NULL);
 				btnState = BTNSTATE_IDLE;
 				btnPressCtr = 0;
-			} else if (buttonState==HIGH  ) {
+			} else if (buttonState == HIGH) {
 				btnLastTime=time(NULL);
 				btnState = BTNSTATE_PRESS;
 				btnPressCtr += 1;
@@ -253,12 +242,6 @@ int main(int argc, char *argv[]) {
 
     /* initialize controller structures with GPIO pin assignments */
 
-    // pin out used in SNESDev article on blog
-	// pads.clock  = RPI_GPIO_P1_18;
-	// pads.strobe = RPI_GPIO_P1_16;
-	// pads.data1  = RPI_GPIO_P1_22;
-	// pads.data2  = RPI_GPIO_P1_15;
-
     // check board revision and set pins to be used
     // these are acutally also used by the gamecon driver
     if (get_rpi_revision()==1)
@@ -303,10 +286,6 @@ int main(int argc, char *argv[]) {
 			/* key events for first controller */
 	        processPadBtn(padButtons.buttons1, SNES_A,     KEY_X,          uinp_fd);
 	        processPadBtn(padButtons.buttons1, SNES_B,     KEY_Z,          uinp_fd);
-	        processPadBtn(padButtons.buttons1, SNES_X,     KEY_S,          uinp_fd);
-	        processPadBtn(padButtons.buttons1, SNES_Y,     KEY_A,          uinp_fd);
-	        processPadBtn(padButtons.buttons1, SNES_L,     KEY_Q,          uinp_fd);
-	        processPadBtn(padButtons.buttons1, SNES_R,     KEY_W,          uinp_fd);
 	        processPadBtn(padButtons.buttons1, SNES_SELECT,KEY_RIGHTSHIFT, uinp_fd);
 	        processPadBtn(padButtons.buttons1, SNES_START, KEY_ENTER,      uinp_fd);
 	        processPadBtn(padButtons.buttons1, SNES_LEFT,  KEY_LEFT,       uinp_fd);
@@ -317,10 +296,6 @@ int main(int argc, char *argv[]) {
 			// key events for second controller 
 	        processPadBtn(padButtons.buttons2, SNES_A,     KEY_E, uinp_fd);
 	        processPadBtn(padButtons.buttons2, SNES_B,     KEY_R, uinp_fd);
-	        processPadBtn(padButtons.buttons2, SNES_X,     KEY_T, uinp_fd);
-	        processPadBtn(padButtons.buttons2, SNES_Y,     KEY_Y, uinp_fd);
-	        processPadBtn(padButtons.buttons2, SNES_L,     KEY_U, uinp_fd);
-	        processPadBtn(padButtons.buttons2, SNES_R,     KEY_I, uinp_fd);
 	        processPadBtn(padButtons.buttons2, SNES_SELECT,KEY_O, uinp_fd);
 	        processPadBtn(padButtons.buttons2, SNES_START, KEY_P, uinp_fd);
 	        processPadBtn(padButtons.buttons2, SNES_LEFT,  KEY_C, uinp_fd);
