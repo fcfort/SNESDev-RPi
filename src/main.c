@@ -178,7 +178,7 @@ void checkButton(int uinh) {
 			}
 			break;
 	}
-	// printf("State: %d, ctr: %d\n",btnState,btnPressCtr );
+	// printf("State: %d \n",btnState );
 }
 
 /* checks, if a button on the pad is pressed and sends an event according the button state. */
@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) {
 	doRun = 1;
 
 	btnState = BTNSTATE_IDLE;
-	btnPressCtr = 0;
+
     if (get_rpi_revision()==1) {
     	buttonPin = BUTTONPIN;
     } else {
