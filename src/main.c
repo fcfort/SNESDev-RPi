@@ -49,15 +49,15 @@
 #define BUTTONPIN     RPI_GPIO_P1_11
 #define BUTTONPIN_V2  RPI_V2_GPIO_P1_11
 #define BTNSTATE_IDLE 0
-#define BTNSTATE_PRESS 1
-#define BTNSTATE_RELEASE 2
-
+#define BTNSTATE_UP_1 1
+#define BTNSTATE_PRESS_1 2
+#define BTNSTATE_UP_2 3
+#define BTNSTATE_PRESS_2 4
 
 int uinp_fd;
 int doRun, pollButton, pollPads;
 time_t btnLastTime;
 uint8_t btnState;
-uint8_t btnPressCtr;
 int buttonPin;
 
 /* Signal callback function */
@@ -134,45 +134,47 @@ void send_key_event(int fd, unsigned int keycode, int keyvalue) {
 void checkButton(int uinh) {
   
   	// read the state of the button into a local variable
-	uint8_t buttonState = bcm2835_gpio_lev(buttonPin);
+	uint8_t buttonPosition = bcm2835_gpio_lev(buttonPin);
   
-  	// three-state machine:
+  	// 5-state machine:
   	// - press and release one times: send "H"
   	// - press and release two times: send "Escape"
-	switch ( btnState ) {
+	switch ( buttonPosition ) {
 		case BTNSTATE_IDLE:
-			if (buttonState==HIGH ) {
-				btnLastTime=time(NULL);
-				btnState = BTNSTATE_PRESS;
-				btnPressCtr += 1;
+			if ( buttonPosition == HIGH ) {
+				btnState = BTNSTATE_UP_1;
 			}
 			break;
-		case BTNSTATE_PRESS:
-			if (buttonState==LOW ) {
-				btnLastTime=time(NULL);
-				btnState = BTNSTATE_RELEASE;
+		case BTNSTATE_UP_1:
+			if ( buttonPosition == LOW ) {
+				btnLastTime = time(NULL);
+				btnState = BTNSTATE_PRESS_1;
 			}
 			break;
-		case BTNSTATE_RELEASE:
-		 	if (buttonState==LOW && difftime(time(NULL),btnLastTime)>1 ) {
-			 	if (btnPressCtr == 1) {
-					// Reset current game
-					send_key_event(uinh, KEY_H,1);
-					usleep(50000);
-					send_key_event(uinh, KEY_H,0);
-			 	} else if (btnPressCtr == 2) {
-					// Return to ES
-					send_key_event(uinh, KEY_ESC,1);
-					usleep(50000);
-					send_key_event(uinh, KEY_ESC,0);
-				}
-				btnLastTime=time(NULL);
+		case BTNSTATE_PRESS_1:
+		 	if ( difftime(time(NULL),btnLastTime) > 1 ) {
+				// Reset current game
+				send_key_event(uinh, KEY_H, 1);
+				usleep(50000); // 0.05s
+				send_key_event(uinh, KEY_H, 0);
 				btnState = BTNSTATE_IDLE;
-				btnPressCtr = 0;
-			} else if (buttonState == HIGH) {
-				btnLastTime=time(NULL);
-				btnState = BTNSTATE_PRESS;
-				btnPressCtr += 1;
+			} else if ( buttonPosition == HIGH ) {
+				btnState = BTNSTATE_UP_2;
+			}
+			break;
+		case BTNSTATE_UP_2:
+			if ( buttonPosition == LOW ) {
+				btnLastTime = time(NULL);
+				btnState = BTNSTATE_PRESS_2;
+			}
+			break;
+		case BTNSTATE_PRESS_2:
+		 	if ( difftime(time(NULL),btnLastTime) > 1 ) {
+				// Return to ES
+				send_key_event(uinh, KEY_ESC,1);
+				usleep(50000);
+				send_key_event(uinh, KEY_ESC,0);
+				btnState = BTNSTATE_IDLE;
 			}
 			break;
 	}
