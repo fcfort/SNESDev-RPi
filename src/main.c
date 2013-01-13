@@ -143,14 +143,14 @@ void checkButton(int uinh) {
 		case BTNSTATE_IDLE:
 			if ( buttonPosition == HIGH ) {
 				btnState = BTNSTATE_UP_1;
-				printf("In idle, changing to up 1");
+				printf("In idle, changing to up 1\n");
 			}
 			break;
 		case BTNSTATE_UP_1:
 			if ( buttonPosition == LOW ) {
 				btnLastTime = time(NULL);
 				btnState = BTNSTATE_PRESS_1;
-				printf("In up 1, changing to press 1");
+				printf("In up 1, changing to press 1\n");
 			}
 			break;
 		case BTNSTATE_PRESS_1:
@@ -160,17 +160,17 @@ void checkButton(int uinh) {
 				usleep(50000); // 0.05s
 				send_key_event(uinh, KEY_H, 0);
 				btnState = BTNSTATE_IDLE;
-				printf("Sent h, returning to idle");
+				printf("Sent h, returning to idle\n");
 			} else if ( buttonPosition == HIGH ) {
 				btnState = BTNSTATE_UP_2;
-				printf("In press 1, changing to up 2");
+				printf("In press 1, changing to up 2\n");
 			}
 			break;
 		case BTNSTATE_UP_2:
 			if ( buttonPosition == LOW ) {
 				btnLastTime = time(NULL);
 				btnState = BTNSTATE_PRESS_2;
-				printf("In up 2, changing to press 2");
+				printf("In up 2, changing to press 2\n");
 			}
 			break;
 		case BTNSTATE_PRESS_2:
@@ -180,7 +180,7 @@ void checkButton(int uinh) {
 				usleep(50000);
 				send_key_event(uinh, KEY_ESC,0);
 				btnState = BTNSTATE_IDLE;
-				printf("Sent esc, returning to idle");
+				printf("Sent esc, returning to idle\n");
 			}
 			break;
 	}
