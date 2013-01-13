@@ -139,7 +139,7 @@ void checkButton(int uinh) {
   	// 5-state machine:
   	// - press and release one times: send "H"
   	// - press and release two times: send "Escape"
-	switch ( buttonPosition ) {
+	switch ( btnState ) {
 		case BTNSTATE_IDLE:
 			if ( buttonPosition == HIGH ) {
 				btnState = BTNSTATE_UP_1;
