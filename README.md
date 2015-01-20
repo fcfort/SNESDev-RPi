@@ -1,7 +1,7 @@
 SNESDev-RPi
 ===========
 
-ffdYKJisu: Redid state machine logic to support the keys I was interested in, "H" and Escape. Also commented out a bunch of non-NES stuff.
+fcfort: Redid state machine logic to support the keys I was interested in, "H" and Escape. Also commented out a bunch of non-NES stuff.
 
 Simulates a virtual keyboard for two SNES controllers that are connected to the GPIO pins of the Raspberry Pi.
 
